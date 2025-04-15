@@ -9,6 +9,7 @@ public class Main {
     static String[] insertionHistory = new String[MAX_PRODUCTS];
     static int historyCount = 0;
 
+    // Menu pop-up when we start program
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         int choice;
@@ -56,6 +57,7 @@ public class Main {
         scanner.close();
     }
 
+    // Stock set up
     static void setUpStock(Scanner scanner) {
         System.out.print("How many products to add initially? ");
         int count = scanner.nextInt();
@@ -82,6 +84,7 @@ public class Main {
         }
     }
 
+    // View Products
     static void viewProducts() {
         if (productCount == 0) {
             System.out.println("No products in stock.");
@@ -98,6 +101,7 @@ public class Main {
         }
     }
 
+    // Insert products
     static void insertProduct(Scanner scanner) {
         if (productCount >= MAX_PRODUCTS) {
             System.out.println("Stock is full!");
@@ -120,6 +124,7 @@ public class Main {
         System.out.println("Product inserted successfully.");
     }
 
+    // Update Products
     static void updateProduct(Scanner scanner) {
         System.out.print("Enter the name of the product to update: ");
         String name = scanner.nextLine();
@@ -142,6 +147,7 @@ public class Main {
         }
     }
 
+    // Delete products
     static void deleteProduct(Scanner scanner) {
         System.out.print("Enter the name of the product to delete: ");
         String name = scanner.nextLine();
