@@ -1,183 +1,202 @@
+import java.util.ArrayList;
 import java.util.Scanner;
-
 public class Main {
-
-    static final int MAX_PRODUCTS = 100;
-    static final int ATTRIBUTES = 3; // Name, Quantity, Price
-    static String[][] products = new String[MAX_PRODUCTS][ATTRIBUTES];
-    static int productCount = 0;
-    static String[] insertionHistory = new String[MAX_PRODUCTS];
-    static int historyCount = 0;
-
-    // Menu pop-up when we start program
+    static ArrayList<String> insertionHistory = new ArrayList<>();
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        int choice;
 
+        String[][] products = null;
+        boolean exit = false;
         do {
-            System.out.println("\n=== Product Stock Management System ===");
-            System.out.println("1. Set Up Stock Catalogue");
-            System.out.println("2. View Products in Stock");
-            System.out.println("3. Insert Product");
-            System.out.println("4. Update Product by Name");
-            System.out.println("5. Delete Product by Name");
-            System.out.println("6. View Insertion History");
+            System.out.println("\n========= STOCK MANAGEMENT MENU =========");
+            System.out.println("1. Set up stocks");
+            System.out.println("2. View product in stock");
+            System.out.println("3. Insert product to stock catalogue");
+            System.out.println("4. Update product in stock catalogue by product name");
+            System.out.println("5. Delete product in stock catalogue by name");
+            System.out.println("6. View insertion history in stock catalogue");
             System.out.println("7. Exit");
-            System.out.print("Choose an option: ");
-            choice = scanner.nextInt();
-            scanner.nextLine(); // Clear input buffer
+            System.out.print("Choose an option (1-7): ");
+            String choice = scanner.nextLine();
 
             switch (choice) {
-                case 1:
-                    setUpStock(scanner);
+                case "1":
+                    Object[] result = setupStock(scanner);
+                    products = (String[][]) result[1];
+                    insertionHistory.clear();
+                    System.out.println("\nStocks set up successfully!");
                     break;
-                case 2:
-                    viewProducts();
+
+                case "2":
+                    if (products == null) {
+                        System.out.println("Please set up the stocks first!");
+                    } else {
+                        displayStocks(products);
+                    }
                     break;
-                case 3:
-                    insertProduct(scanner);
+
+                case "3":
+                    if (products == null) {
+                        System.out.println("Please set up the stocks first!");
+                    } else {
+                        insertProduct(scanner, products);
+                    }
                     break;
-                case 4:
-                    updateProduct(scanner);
+
+                case "4":
+                    if (products == null) {
+                        System.out.println("Please set up the stocks first!");
+                    } else {
+                        updateProduct(scanner, products);
+                    }
                     break;
-                case 5:
-                    deleteProduct(scanner);
+
+                case "5":
+                    if (products == null) {
+                        System.out.println("Please set up the stocks first!");
+                    } else {
+                        deleteProduct(scanner, products);
+                    }
                     break;
-                case 6:
-                    viewHistory();
+
+                case "6":
+                    viewInsertionHistory();
                     break;
-                case 7:
-                    System.out.println("Exiting... Thank you!");
+
+                case "7":
+                    exit = true;
+                    System.out.println("Exiting the program. Goodbye!");
                     break;
+
                 default:
-                    System.out.println("Invalid choice!");
+                    System.out.println("Invalid choice! Please try again.");
             }
-        } while (choice != 7);
+
+        } while (!exit);
 
         scanner.close();
     }
 
-    // Stock set up
-    static void setUpStock(Scanner scanner) {
-        System.out.print("How many products to add initially? ");
-        int count = scanner.nextInt();
-        scanner.nextLine(); // Clear input buffer
+    public static Object[] setupStock(Scanner scanner) {
+        System.out.print("Input number of stocks: ");
+        int numStocks = Integer.parseInt(scanner.nextLine());
 
-        for (int i = 0; i < count; i++) {
-            if (productCount >= MAX_PRODUCTS) {
-                System.out.println("Stock full!");
-                break;
+        int[] cataloguesPerStock = new int[numStocks];
+        String[][] products = new String[numStocks][];
+
+        for (int i = 0; i < numStocks; i++) {
+            System.out.print("Input number of catalogues for stock " + (i + 1) + ": ");
+            int count = Integer.parseInt(scanner.nextLine());
+            cataloguesPerStock[i] = count;
+            products[i] = new String[count];
+        }
+
+        return new Object[]{cataloguesPerStock, products};
+    }
+
+    public static void displayStocks(String[][] products) {
+        System.out.println("\n====> STOCK VIEW <====");
+        for (int i = 0; i < products.length; i++) {
+            System.out.print("[+] Stock [" + (i + 1) + "] => ");
+            for (int j = 0; j < products[i].length; j++) {
+                if (products[i][j] == null) {
+                    System.out.print("[ " + (j + 1) + " -> EMPTY ] ");
+                } else {
+                    System.out.print("[ " + (j + 1) + " -> " + products[i][j] + " ] ");
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    public static void insertProduct(Scanner scanner, String[][] products) {
+        try {
+            System.out.print("Enter stock number: ");
+            int stockNum = Integer.parseInt(scanner.nextLine()) - 1;
+
+            if (stockNum < 0 || stockNum >= products.length) {
+                System.out.println("Invalid stock number!");
+                return;
             }
 
-            System.out.print("Enter Product Name: ");
-            String name = scanner.nextLine();
-            System.out.print("Enter Quantity: ");
-            String quantity = scanner.nextLine();
-            System.out.print("Enter Price: ");
-            String price = scanner.nextLine();
+            System.out.print("Enter catalogue number: ");
+            int catNum = Integer.parseInt(scanner.nextLine()) - 1;
 
-            products[productCount][0] = name;
-            products[productCount][1] = quantity;
-            products[productCount][2] = price;
-            insertionHistory[historyCount++] = "Inserted: " + name;
-            productCount++;
-        }
-    }
-
-    // View Products
-    static void viewProducts() {
-        if (productCount == 0) {
-            System.out.println("No products in stock.");
-            return;
-        }
-
-        System.out.println("\n--- Product Catalogue ---");
-        for (int i = 0; i < productCount; i++) {
-            if (products[i][0] != null) {
-                System.out.println((i + 1) + ". Name: " + products[i][0] +
-                        ", Quantity: " + products[i][1] +
-                        ", Price: $" + products[i][2]);
+            if (catNum < 0 || catNum >= products[stockNum].length) {
+                System.out.println("Invalid catalogue number!");
+                return;
             }
+
+            if (products[stockNum][catNum] != null) {
+                System.out.println("That spot is already occupied with: " + products[stockNum][catNum]);
+                return;
+            }
+
+            System.out.print("Enter product name: ");
+            String productName = scanner.nextLine();
+            products[stockNum][catNum] = productName;
+            insertionHistory.add("Inserted '" + productName + "' at Stock " + (stockNum + 1) + ", Catalogue " + (catNum + 1));
+            System.out.println("Product inserted successfully!");
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter numeric values.");
         }
     }
 
-    // Insert products
-    static void insertProduct(Scanner scanner) {
-        if (productCount >= MAX_PRODUCTS) {
-            System.out.println("Stock is full!");
-            return;
-        }
-
-        System.out.print("Enter Product Name: ");
-        String name = scanner.nextLine();
-        System.out.print("Enter Quantity: ");
-        String quantity = scanner.nextLine();
-        System.out.print("Enter Price: ");
-        String price = scanner.nextLine();
-
-        products[productCount][0] = name;
-        products[productCount][1] = quantity;
-        products[productCount][2] = price;
-        insertionHistory[historyCount++] = "Inserted: " + name;
-        productCount++;
-
-        System.out.println("Product inserted successfully.");
-    }
-
-    // Update Products
-    static void updateProduct(Scanner scanner) {
-        System.out.print("Enter the name of the product to update: ");
-        String name = scanner.nextLine();
+    public static void updateProduct(Scanner scanner, String[][] products) {
+        System.out.print("Enter product name to update: ");
+        String oldName = scanner.nextLine();
         boolean found = false;
 
-        for (int i = 0; i < productCount; i++) {
-            if (products[i][0] != null && products[i][0].equalsIgnoreCase(name)) {
-                System.out.print("Enter new Quantity: ");
-                products[i][1] = scanner.nextLine();
-                System.out.print("Enter new Price: ");
-                products[i][2] = scanner.nextLine();
-                System.out.println("Product updated successfully.");
-                found = true;
-                break;
+        for (int i = 0; i < products.length; i++) {
+            for (int j = 0; j < products[i].length; j++) {
+                if (oldName.equalsIgnoreCase(products[i][j])) {
+                    System.out.print("Enter new product name: ");
+                    String newName = scanner.nextLine();
+                    products[i][j] = newName;
+                    insertionHistory.add("Updated '" + oldName + "' to '" + newName + "' at Stock " + (i + 1) + ", Catalogue " + (j + 1));
+                    System.out.println("Product updated successfully!");
+                    found = true;
+                    break;
+                }
             }
         }
 
         if (!found) {
-            System.out.println("Product not found!");
+            System.out.println("Product name not found.");
         }
     }
 
-    // Delete products
-    static void deleteProduct(Scanner scanner) {
-        System.out.print("Enter the name of the product to delete: ");
-        String name = scanner.nextLine();
-        boolean found = false;
+    public static void deleteProduct(Scanner scanner, String[][] products) {
+        System.out.print("Enter product name to delete: ");
+        String nameToDelete = scanner.nextLine();
+        boolean deleted = false;
 
-        for (int i = 0; i < productCount; i++) {
-            if (products[i][0] != null && products[i][0].equalsIgnoreCase(name)) {
-                products[i][0] = null;
-                products[i][1] = null;
-                products[i][2] = null;
-                System.out.println("Product deleted successfully.");
-                found = true;
-                break;
+        for (int i = 0; i < products.length; i++) {
+            for (int j = 0; j < products[i].length; j++) {
+                if (nameToDelete.equalsIgnoreCase(products[i][j])) {
+                    products[i][j] = null;
+                    insertionHistory.add("Deleted '" + nameToDelete + "' from Stock " + (i + 1) + ", Catalogue " + (j + 1));
+                    System.out.println("Product deleted successfully!");
+                    deleted = true;
+                    break;
+                }
             }
         }
 
-        if (!found) {
-            System.out.println("Product not found!");
+        if (!deleted) {
+            System.out.println("Product name not found.");
         }
     }
 
-    static void viewHistory() {
-        if (historyCount == 0) {
-            System.out.println("No insertion history.");
-            return;
-        }
-
-        System.out.println("\n--- Insertion History ---");
-        for (int i = 0; i < historyCount; i++) {
-            System.out.println((i + 1) + ". " + insertionHistory[i]);
+    public static void viewInsertionHistory() {
+        System.out.println("\n====> INSERTION HISTORY <====");
+        if (insertionHistory.isEmpty()) {
+            System.out.println("No history yet.");
+        } else {
+            for (String entry : insertionHistory) {
+                System.out.println("- " + entry);
+            }
         }
     }
 }
+
