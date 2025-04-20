@@ -119,7 +119,22 @@ public class Main {
                 return;
             }
 
-            System.out.print("Enter catalogue number: ");
+            // Show only empty catalogues in the selected stock
+            System.out.println("Available catalogues in Stock " + (stockNum + 1) + ":");
+            boolean hasEmpty = false;
+            for (int j = 0; j < products[stockNum].length; j++) {
+                if (products[stockNum][j] == null) {
+                    System.out.println("-> Catalogue " + (j + 1) + " [EMPTY]");
+                    hasEmpty = true;
+                }
+            }
+
+            if (!hasEmpty) {
+                System.out.println("No empty catalogues available in this stock.");
+                return;
+            }
+
+            System.out.print("Enter catalogue number from the list above: ");
             int catNum = Integer.parseInt(scanner.nextLine()) - 1;
 
             if (catNum < 0 || catNum >= products[stockNum].length) {
@@ -141,6 +156,7 @@ public class Main {
             System.out.println("Invalid input. Please enter numeric values.");
         }
     }
+
 
     public static void updateProduct(Scanner scanner, String[][] products) {
         System.out.print("Enter product name to update: ");
