@@ -120,11 +120,11 @@ public class Main {
             }
 
             // Show only empty catalogues in the selected stock
-            System.out.println("Available catalogues in Stock " + (stockNum + 1) + ":");
+            System.out.println("Available catalogues in Stock [" + (stockNum + 1) + "]:");
             boolean hasEmpty = false;
             for (int j = 0; j < products[stockNum].length; j++) {
                 if (products[stockNum][j] == null) {
-                    System.out.println("-> Catalogue " + (j + 1) + " [EMPTY]");
+                    System.out.print("[ " + (j + 1) + " -> EMPTY ] ");
                     hasEmpty = true;
                 }
             }
@@ -134,7 +134,7 @@ public class Main {
                 return;
             }
 
-            System.out.print("Enter catalogue number from the list above: ");
+            System.out.print("\nEnter catalogue number from the list above: ");
             int catNum = Integer.parseInt(scanner.nextLine()) - 1;
 
             if (catNum < 0 || catNum >= products[stockNum].length) {
