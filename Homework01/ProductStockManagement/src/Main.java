@@ -146,7 +146,6 @@ public class Main {
                 System.out.println("That spot is already occupied with: " + products[stockNum][catNum]);
                 return;
             }
-
             System.out.print("Enter product name: ");
             String productName = scanner.nextLine();
             products[stockNum][catNum] = productName;
