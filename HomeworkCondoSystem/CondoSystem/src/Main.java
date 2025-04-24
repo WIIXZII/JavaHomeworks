@@ -1,141 +1,135 @@
 import java.util.*;
 
-class Condo {
-    int floor;
-    int room;
-    String owner;
-
-    Condo(int floor, int room) {
-        this.floor = floor;
-        this.room = room;
-        this.owner = null;
-    }
-
-    boolean isAvailable() {
-        return owner == null;
-    }
-
-    String getRoomLabel() {
-        return "Floor " + floor + ", Room " + room;
-    }
+class Room {
+    String guestName = "";
+    boolean isOccupied = false;
+    List<String> history = new ArrayList<>();
 }
 
 public class Main {
     static Scanner scanner = new Scanner(System.in);
-    static List<Condo> condos = new ArrayList<>();
+    static Room[] rooms;
+    static int totalRooms;
 
     public static void main(String[] args) {
         int choice;
-
         do {
-            System.out.println("\n=== Condo Management System ===");
-            System.out.println("1. Setup Condo (Floor and Room)");
-            System.out.println("2. Buy Condo");
-            System.out.println("3. Sell Condo");
-            System.out.println("4. Search Condo Owner");
-            System.out.println("5. Exit");
-            System.out.print("Choose option: ");
+            System.out.println("\n--- Condo Management System ---");
+            System.out.println("1. Setup condo");
+            System.out.println("2. Display rooms");
+            System.out.println("3. Check-in room");
+            System.out.println("4. Check-out room");
+            System.out.println("5. View history");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice: ");
             choice = scanner.nextInt();
-            scanner.nextLine(); // consume newline
+            scanner.nextLine();  // Consume newline
 
             switch (choice) {
-                case 1:
-                    setupCondo();
-                    break;
-                case 2:
-                    buyCondo();
-                    break;
-                case 3:
-                    sellCondo();
-                    break;
-                case 4:
-                    searchCondoOwner();
-                    break;
-                case 5:
-                    System.out.println("Exiting system. Goodbye!");
-                    break;
-                default:
-                    System.out.println("Invalid option. Try again.");
+                case 1: setupCondo(); break;
+                case 2: displayRooms(); break;
+                case 3: checkInRoom(); break;
+                case 4: checkOutRoom(); break;
+                case 5: viewHistory(); break;
+                case 6: System.out.println("Exiting..."); break;
+                default: System.out.println("Invalid choice.");
             }
-        } while (choice != 5);
+        } while (choice != 6);
     }
 
     static void setupCondo() {
-        System.out.print("Enter number of floors: ");
-        int floors = scanner.nextInt();
-        System.out.print("Enter number of rooms per floor: ");
-        int rooms = scanner.nextInt();
-
-        condos.clear();
-        for (int f = 1; f <= floors; f++) {
-            for (int r = 1; r <= rooms; r++) {
-                condos.add(new Condo(f, r));
-            }
-        }
-
-        System.out.println("Condo setup complete: " + floors + " floors, " + rooms + " rooms per floor.");
-    }
-
-    static void buyCondo() {
-        System.out.print("Enter floor: ");
-        int floor = scanner.nextInt();
-        System.out.print("Enter room: ");
-        int room = scanner.nextInt();
+        System.out.print("Enter number of rooms to setup: ");
+        totalRooms = scanner.nextInt();
         scanner.nextLine();
-        Condo condo = findCondo(floor, room);
+        rooms = new Room[totalRooms];
+        for (int i = 0; i < totalRooms; i++) {
+            rooms[i] = new Room();
+        }
+        System.out.println("Condo setup complete with " + totalRooms + " rooms.");
+    }
 
-        if (condo == null) {
-            System.out.println("Condo not found.");
-        } else if (!condo.isAvailable()) {
-            System.out.println("Condo already owned by: " + condo.owner);
+    static void displayRooms() {
+        if (rooms == null) {
+            System.out.println("Please setup condo first.");
+            return;
+        }
+        System.out.println("Room Status:");
+        for (int i = 0; i < rooms.length; i++) {
+            System.out.printf("Room %d: %s%n", i + 1, rooms[i].isOccupied ? "Occupied by " + rooms[i].guestName : "Available");
+        }
+    }
+
+    static void checkInRoom() {
+        if (rooms == null) {
+            System.out.println("Please setup condo first.");
+            return;
+        }
+        System.out.print("Enter room number to check in: ");
+        int roomNum = scanner.nextInt();
+        scanner.nextLine();
+        if (roomNum < 1 || roomNum > totalRooms) {
+            System.out.println("Invalid room number.");
+            return;
+        }
+
+        Room room = rooms[roomNum - 1];
+        if (room.isOccupied) {
+            System.out.println("Room is already occupied.");
         } else {
-            System.out.print("Enter buyer's name: ");
+            System.out.print("Enter guest name: ");
             String name = scanner.nextLine();
-            condo.owner = name;
-            System.out.println("Condo bought successfully.");
+            room.guestName = name;
+            room.isOccupied = true;
+            room.history.add("Checked in: " + name);
+            System.out.println("Guest checked in.");
         }
     }
 
-    static void sellCondo() {
-        System.out.print("Enter floor: ");
-        int floor = scanner.nextInt();
-        System.out.print("Enter room: ");
-        int room = scanner.nextInt();
-        Condo condo = findCondo(floor, room);
+    static void checkOutRoom() {
+        if (rooms == null) {
+            System.out.println("Please setup condo first.");
+            return;
+        }
+        System.out.print("Enter room number to check out: ");
+        int roomNum = scanner.nextInt();
+        scanner.nextLine();
+        if (roomNum < 1 || roomNum > totalRooms) {
+            System.out.println("Invalid room number.");
+            return;
+        }
 
-        if (condo == null) {
-            System.out.println("Condo not found.");
-        } else if (condo.isAvailable()) {
-            System.out.println("This condo is already available.");
+        Room room = rooms[roomNum - 1];
+        if (!room.isOccupied) {
+            System.out.println("Room is already available.");
         } else {
-            condo.owner = null;
-            System.out.println("Condo is now available for sale.");
+            room.history.add("Checked out: " + room.guestName);
+            room.guestName = "";
+            room.isOccupied = false;
+            System.out.println("Guest checked out.");
         }
     }
 
-    static void searchCondoOwner() {
-        System.out.print("Enter owner name to search: ");
-        String name = scanner.nextLine();
-        boolean found = false;
+    static void viewHistory() {
+        if (rooms == null) {
+            System.out.println("Please setup condo first.");
+            return;
+        }
+        System.out.print("Enter room number to view history: ");
+        int roomNum = scanner.nextInt();
+        scanner.nextLine();
+        if (roomNum < 1 || roomNum > totalRooms) {
+            System.out.println("Invalid room number.");
+            return;
+        }
 
-        for (Condo condo : condos) {
-            if (name.equalsIgnoreCase(condo.owner)) {
-                System.out.println("Owned Condo: " + condo.getRoomLabel());
-                found = true;
+        Room room = rooms[roomNum - 1];
+        System.out.println("History for Room " + roomNum + ":");
+        if (room.history.isEmpty()) {
+            System.out.println("No history available.");
+        } else {
+            for (String record : room.history) {
+                System.out.println("- " + record);
             }
         }
-
-        if (!found) {
-            System.out.println("No condos found for owner: " + name);
-        }
-    }
-
-    static Condo findCondo(int floor, int room) {
-        for (Condo condo : condos) {
-            if (condo.floor == floor && condo.room == room) {
-                return condo;
-            }
-        }
-        return null;
     }
 }
